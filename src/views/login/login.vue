@@ -7,6 +7,35 @@
         <span class="line"></span>
         <span class="sub_title">用户登录</span>
       </div>
+      <el-row class="row">
+        <el-col :span="24" class="col">
+          <el-input placeholder="请输入手机号" prefix-icon="el-icon-user" v-model="input2"></el-input>
+        </el-col>
+      </el-row>
+      <el-row class="row">
+        <el-col :span="24" class="col">
+          <el-input placeholder="请输入密码" prefix-icon="el-icon-lock" v-model="input2"></el-input>
+        </el-col>
+      </el-row>
+      <el-row class="row">
+        <el-col :span="18" class="col">
+          <el-input placeholder="请输入验证码" prefix-icon="el-icon-key" v-model="input2"></el-input>
+        </el-col>
+        <el-col :span="6" class="col">
+          <img src="../../assets/captcha.png" alt />
+        </el-col>
+      </el-row>
+      <!-- 协议 条款 -->
+      <div class="private">
+        <el-checkbox v-model="checked"></el-checkbox>
+        <p class="agree">
+          我已阅读并同意
+          <el-link type="primary">用户协议</el-link>和
+          <el-link type="primary">隐私条款</el-link>
+        </p>
+      </div>
+      <el-button type="primary">登录</el-button>
+      <el-button type="primary">注册</el-button>
     </div>
     <img src="../../assets/login_bg.png" alt class="bg" />
   </div>
@@ -37,9 +66,9 @@ export default {
   .from-wrapper {
     width: 478px;
     height: 550px;
-    background:rgba(245,245,245,1);
+    background: rgba(245, 245, 245, 1);
     padding: 44px 41px 0 43px;
-
+    box-sizing: border-box;
     .top {
       display: flex;
       align-items: center;
@@ -68,6 +97,44 @@ export default {
         font-weight: 400;
         color: rgba(12, 12, 12, 1);
       }
+    }
+    .el-input__inner {
+      height: 44px;
+    }
+    .row {
+      margin-top: 30px;
+    }
+
+    img {
+      height: 44px;
+      width: 100%;
+    }
+
+  // 协议 条款
+    .private {
+      display: flex;
+      align-items: center;
+      margin-top: 30px;
+
+      .agree {
+        margin-left: 7px;
+        display: flex;
+        font-size: 14px;
+        align-items: center;
+        .el-link--inner {
+          font-size: 14px;
+        }
+      }
+    }
+
+    // 两个按钮
+    .el-button.el-button--primary {
+      width: 394px;
+      height: 40px;
+      font-size: 16px;
+      display: block;
+      margin-left: 0;
+      margin-top: 30px;
     }
   }
 
