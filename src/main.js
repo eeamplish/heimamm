@@ -9,6 +9,8 @@ import 'element-ui/lib/theme-chalk/index.css';
 // 导入路由
 import router from './router/router'
 
+import './style/base.css'
+
 // 使用eleme-ui
 Vue.use(ElementUI);
 
