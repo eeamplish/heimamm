@@ -74,6 +74,15 @@
           </el-table-column>
         </el-table>
       </el-card>
+      <el-pagination
+        background
+        :current-page="1"
+        :page-sizes="[10, 20, 30, 40]"
+        :page-size="20"
+        :pager-count="5"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="100"
+      ></el-pagination>
     </div>
   </div>
 </template>
@@ -96,7 +105,7 @@ export default {
           date: "2016-05-02",
           state: "启用"
         },
-      
+
         {
           num: "qd00",
           subName: "qdyidkf",
@@ -104,8 +113,7 @@ export default {
           name: "王果他",
           date: "2017-05-02",
           state: "启用"
-        },
-      
+        }
       ]
     };
   },
@@ -119,6 +127,13 @@ export default {
     handleDelete(index, row) {
       window.console.log(index, row);
     }
+    // 分页
+    //  handleSizeChange(val) {
+    //     window.console.log(`每页 ${val} 条`);
+    //   },
+    //   handleCurrentChange(val) {
+    //     window.console.log(`当前页: ${val}`);
+    //   }
   }
 };
 </script>
@@ -132,5 +147,11 @@ export default {
   .col2 {
     width: 130px;
   }
+}
+.main {
+  margin-top: 20px;
+}
+.el-pagination {
+  margin-top: 30px;
 }
 </style>
