@@ -62,8 +62,8 @@
       :visible.sync="dialogVisible"
       width="600px"
       height="780px"
-      :before-close="false"
-      :top="3"
+      top="6"
+      center
     >
       <el-form
         :model="registerForm"
@@ -80,6 +80,7 @@
             :on-success="handleAvatarSuccess"
             :before-upload="beforeAvatarUpload"
             name="image"
+            style="text-align:center"
           >
             <img v-if="imageUrl" :src="imageUrl" class="avatar" />
             <i v-else class="el-icon-plus avatar-uploader-icon"></i>
@@ -98,18 +99,25 @@
         <el-form-item label="密码" prop="password">
           <el-input v-model="registerForm.password"></el-input>
         </el-form-item>
-        <el-form-item label="图形码" prop="rcode">
+        <el-form-item label="图形码" prop="code">
           <el-row>
             <el-col :span="16">
               <el-input v-model="registerForm.code" autocomplete="off"></el-input>
             </el-col>
             <el-col :span="7" :offset="1">
-              <img class="captcha" :src="code" @click="changeCaptcha" alt />
+              <img
+                class="captcha"
+                :src="code"
+                width="100%"
+                height="100%"
+                @click="changeCaptcha"
+                alt
+              />
             </el-col>
           </el-row>
         </el-form-item>
 
-        <el-form-item label="验证码" prop="code">
+        <el-form-item label="验证码" prop="rcode">
           <el-row>
             <el-col :span="16">
               <el-input v-model="registerForm.rcode"></el-input>
@@ -121,9 +129,9 @@
         </el-form-item>
       </el-form>
 
-      <span slot="footer" class="dialog-footer">
+      <span slot="footer" class="dialog-footer" center>
         <el-button @click="dialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
+        <el-button type="primary" @click="register">确 定</el-button>
       </span>
     </el-dialog>
   </div>
@@ -143,7 +151,21 @@ const checkPhone = function(rule, value, callback) {
   }
 };
 
+const checkEmail = function(rule, value, callback) {
+  if (!value.trim()) {
+    callback(new Error("邮箱不能为空"));
+  } else {
+    const reg = /\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*/;
+    if (reg.test(value)) {
+      callback();
+    } else {
+      callback(new Error("请输入正确的邮箱"));
+    }
+  }
+};
+
 import axios from "axios";
+import { setToken } from "../../utils/token.js";
 
 export default {
   name: "login",
@@ -160,6 +182,7 @@ export default {
         rcode: ""
       },
       registerForm: {
+        avatar: "",
         name: "",
         email: "",
         phone: "",
@@ -176,7 +199,7 @@ export default {
         ],
         password: [
           { required: true, message: "密码不能为空", trigger: "blur" },
-          { min: 2, max: 6, message: "密码为2-6位", trigger: "blur" }
+          { min: 2, max: 11, message: "密码为2-6位", trigger: "blur" }
         ],
         rcode: [
           { required: true, message: "验证码不能为空", trigger: "blur" },
@@ -185,12 +208,11 @@ export default {
         icon: [{ required: true }],
         name: [
           { required: true, message: "昵称不能为空", trigger: "blur" },
-          { min: 2, max: 6, message: "昵称为2-6位", trigger: "blur" }
+          { min: 2, max: 10, message: "昵称为2-6位", trigger: "blur" }
         ],
         email: [
-          { required: true, message: "邮箱不能为空", trigger: "blur" }
-          // {  message: '请输入正确的邮箱', trigger: 'blur' },
-          // 正则验证
+          { required: true, message: "邮箱不能为空", trigger: "blur" },
+          { validator: checkEmail, trigger: "blur" }
         ],
         code: [
           { required: true, message: "验证码不能为空", trigger: "blur" },
@@ -201,7 +223,6 @@ export default {
   },
   methods: {
     submitForm(formName) {
-      window.console.log(this.checked);
       this.$refs[formName].validate(valid => {
         if (this.checked) {
           if (valid) {
@@ -218,7 +239,11 @@ export default {
               }
             }).then(res => {
               //成功回调
-              this.$message(res.data.message);
+              if (res.data.code == 200) {
+                this.$message("登🦌成功");
+                this.$router.push("/index");
+                setToken(res.data.data.token);
+              }
             });
           } else {
             this.$message.warning("请输入正确的数据");
@@ -232,15 +257,11 @@ export default {
     changeCode() {
       this.rcode = `http://183.237.67.218:3002/captcha?type=login&${Date.now()}`;
     },
-    // handleClose(done) {
-    //   this.$confirm("确认关闭？")
-    //     .then(_ => {
-    //       done();
-    //     })
-    //     .catch(_ => {});
-    // },
     handleAvatarSuccess(res, file) {
       this.imageUrl = URL.createObjectURL(file.raw);
+      window.console.log(res);
+      window.console.log(file);
+      window.console.log(this.imageUrl);
     },
     beforeAvatarUpload(file) {
       const isJPG = file.type === "image/jpeg";
@@ -258,6 +279,7 @@ export default {
       this.code = `http://183.237.67.218:3002/captcha?type=sendsms${Date.now()}`;
     },
     sendCode() {
+      
       axios({
         url: "http://183.237.67.218:3002/sendsms",
         method: "post",
@@ -265,6 +287,24 @@ export default {
         data: {
           code: this.registerForm.code,
           phone: this.registerForm.phone
+        }
+      }).then(res => {
+        //成功回调
+        window.console.log(res);
+      });
+    },
+    register() {
+      this.dialogVisible = false;
+      axios({
+        url: "http://183.237.67.218:3002/register",
+        method: "post",
+        data: {
+          name: this.registerForm.name,
+          phone: this.registerForm.phone,
+          email: this.registerForm.email,
+          avatar: this.imageUrl,
+          password: this.registerForm.password,
+          rcode: this.registerForm.rcode
         }
       }).then(res => {
         //成功回调
@@ -375,6 +415,41 @@ export default {
   .bg {
     width: 633px;
     height: 435px;
+  }
+
+  .el-dialog {
+    .el-dialog__header {
+      background-color: rgb(3, 188, 250);
+      .el-dialog__title {
+        color: rgba(254, 254, 254, 1);
+      }
+      .el-dialog__headerbtn {
+        display: none;
+      }
+    }
+    .avatar-uploader .el-upload {
+      border: 1px dashed #d9d9d9;
+      border-radius: 6px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+    .avatar-uploader .el-upload:hover {
+      border-color: #409eff;
+    }
+    .avatar-uploader-icon {
+      font-size: 28px;
+      color: #8c939d;
+      width: 178px;
+      height: 178px;
+      line-height: 178px;
+      text-align: center;
+    }
+    .avatar {
+      width: 178px;
+      height: 178px;
+      display: block;
+    }
   }
 }
 </style>
