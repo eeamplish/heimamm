@@ -2,6 +2,8 @@ import axios from 'axios'
 
 import {getToken,removeToken} from '../utils/token'
 
+
+import router from '../router/router'
 // 设置基地址
 axios.defaults.baseURL = 'http://183.237.67.218:3002';
 // 设置跨域携带cookie
@@ -65,14 +67,14 @@ axios.interceptors.request.use(
   axios.interceptors.response.use(
     function(response) {
       // 判断token
-      
       if (response.data.code === 0) {
           // 提示
-        //   Message.error('小老弟，伪造token，牛逼啊！')
+          // Message.error('小老弟，伪造token，牛逼啊！')
+          alert('小老弟，伪造token，牛逼啊！')
         // 删除token
         removeToken();
         // 去登录页
-        // router.push("/login");
+        router.push("/login");
         return;
       }
       return response;

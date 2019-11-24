@@ -75,7 +75,7 @@
         <el-form-item label="头像" prop="icon">
           <el-upload
             class="avatar-uploader"
-            action="https://jsonplaceholder.typicode.com/posts/"
+            action="http://183.237.67.218:3002/uploads"
             :show-file-list="false"
             :on-success="handleAvatarSuccess"
             :before-upload="beforeAvatarUpload"
@@ -138,6 +138,7 @@
 </template>
 
 <script>
+
 const checkPhone = function(rule, value, callback) {
   if (!value.trim()) {
     callback(new Error("手机号不能为空"));
@@ -164,8 +165,8 @@ const checkEmail = function(rule, value, callback) {
   }
 };
 
-import axios from "axios";
 import { setToken } from "../../utils/token.js";
+import { login, register, sendsms } from "../../api/api.js";
 
 export default {
   name: "login",
@@ -226,17 +227,22 @@ export default {
       this.$refs[formName].validate(valid => {
         if (this.checked) {
           if (valid) {
-            axios({
-              url: "http://183.237.67.218:3002/login",
-              method: "post",
-              // 跨域请求时,默认不带cookie 导致验证码无法验证
-              // 为了携带cookie 加下面这行代码
-              withCredentials: true,
-              data: {
-                phone: this.ruleForm.phone,
-                password: this.ruleForm.password,
-                code: this.ruleForm.rcode
-              }
+            // axios({
+            //   url: "http://183.237.67.218:3002/login",
+            //   method: "post",
+            //   // 跨域请求时,默认不带cookie 导致验证码无法验证
+            //   // 为了携带cookie 加下面这行代码
+            //   withCredentials: true,
+            // data: {
+            //   phone: this.ruleForm.phone,
+            //   password: this.ruleForm.password,
+            //   code: this.ruleForm.rcode
+            // }
+            // })
+            login({
+              phone: this.ruleForm.phone,
+              password: this.ruleForm.password,
+              code: this.ruleForm.rcode
             }).then(res => {
               //成功回调
               if (res.data.code == 200) {
@@ -279,15 +285,18 @@ export default {
       this.code = `http://183.237.67.218:3002/captcha?type=sendsms${Date.now()}`;
     },
     sendCode() {
-      
-      axios({
-        url: "http://183.237.67.218:3002/sendsms",
-        method: "post",
-        withCredentials: true,
-        data: {
-          code: this.registerForm.code,
-          phone: this.registerForm.phone
-        }
+      // axios({
+      //   url: "http://183.237.67.218:3002/sendsms",
+      //   method: "post",
+      //   withCredentials: true,
+      // data: {
+      //   code: this.registerForm.code,
+      //   phone: this.registerForm.phone
+      // }
+      // })
+      sendsms({
+        code: this.registerForm.code,
+        phone: this.registerForm.phone
       }).then(res => {
         //成功回调
         window.console.log(res);
@@ -295,17 +304,25 @@ export default {
     },
     register() {
       this.dialogVisible = false;
-      axios({
-        url: "http://183.237.67.218:3002/register",
-        method: "post",
-        data: {
-          name: this.registerForm.name,
-          phone: this.registerForm.phone,
-          email: this.registerForm.email,
-          avatar: this.imageUrl,
-          password: this.registerForm.password,
-          rcode: this.registerForm.rcode
-        }
+      // axios({
+      //   url: "http://183.237.67.218:3002/register",
+      //   method: "post",
+      //   data: {
+      //     name: this.registerForm.name,
+      //     phone: this.registerForm.phone,
+      //     email: this.registerForm.email,
+      //     avatar: this.imageUrl,
+      //     password: this.registerForm.password,
+      //     rcode: this.registerForm.rcode
+      //   }
+      // })
+      register({
+        name: this.registerForm.name,
+        phone: this.registerForm.phone,
+        email: this.registerForm.email,
+        avatar: this.imageUrl,
+        password: this.registerForm.password,
+        rcode: this.registerForm.rcode
       }).then(res => {
         //成功回调
         window.console.log(res);
