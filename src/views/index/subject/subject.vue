@@ -25,7 +25,11 @@
             <el-button>清除</el-button>
           </el-form-item>
           <el-form-item>
-            <el-button type="primary" icon="el-icon-plus" @click="dialogVisible = true">新增学科</el-button>
+            <el-button
+              type="primary"
+              icon="el-icon-plus"
+              @click="dialogVisible = true,title='新增学科'"
+            >新增学科</el-button>
           </el-form-item>
         </el-form>
       </el-card>
@@ -92,7 +96,7 @@
       ></el-pagination>
 
       <!-- 新增学科的对话框 -->
-      <el-dialog title="新增学科" :visible.sync="dialogVisible" width="570px" center>
+      <el-dialog :title="title" @close="close" :visible.sync="dialogVisible" width="570px" center>
         <!-- 对话框内表单 -->
         <el-form
           :model="ruleForm"
@@ -159,6 +163,7 @@ export default {
       ],
 
       // 对话框数据
+      title: "新增学科",
       dialogVisible: false,
       ruleForm: {
         rid: "",
@@ -176,9 +181,24 @@ export default {
 
   // -----------------------------  methods  -----------------------------
   methods: {
+    // 编辑数据
     handleEdit(index, row) {
       window.console.log(index, row);
+      this.dialogVisible = true;
+      this.title = "编辑学科";
+      this.ruleForm = {...row};
+      // subject.edit({...this.ruleForm}).then(res=>{
+      //   window.console.log(res);
+      // })
     },
+
+    // 关闭dialog框清空表单
+     close() {
+       window.console.log('close')
+        this.ruleForm = {};
+      },
+
+
     // 删除一行数据
     handleDelete(index, row) {
       window.console.log(index, row.id);
@@ -247,14 +267,25 @@ export default {
     // 新增学科
     add() {
       this.dialogVisible = false;
-      subject
+      if(this.title == "新增学科"){
+         subject
         .add({
           ...this.ruleForm
         })
         .then(res => {
           window.console.log(res);
         });
-    },
+      }else if(this.title == "编辑学科") {
+        subject.edit({...this.ruleForm}).then(res=>{
+          window.console.log(res);
+           if (res.data.code == 200) {
+            // 调用搜索方法刷新页面
+            this.$message.success(res.data.message);
+            this.search();
+          }
+        })
+      }
+     },
     // 对话框事件
     submitForm(formName) {
       this.$refs[formName].validate(valid => {
