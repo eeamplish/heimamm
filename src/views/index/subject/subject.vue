@@ -25,7 +25,7 @@
             <el-button>清除</el-button>
           </el-form-item>
           <el-form-item>
-            <el-button type="primary" icon="el-icon-plus">新增学科</el-button>
+            <el-button type="primary" icon="el-icon-plus" @click="dialogVisible = true">新增学科</el-button>
           </el-form-item>
         </el-form>
       </el-card>
@@ -69,7 +69,11 @@
           <el-table-column label="操作">
             <template slot-scope="scope">
               <el-button type="text" size="small" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
-              <el-button type="text" size="small" @click="changeStatus(scope.$index, scope.row)"> {{ scope.row.status==0 ?"启用":"禁用" }} </el-button>
+              <el-button
+                type="text"
+                size="small"
+                @click="changeStatus(scope.$index, scope.row)"
+              >{{ scope.row.status==0 ?"启用":"禁用" }}</el-button>
               <el-button type="text" size="small" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
             </template>
           </el-table-column>
@@ -79,13 +83,46 @@
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
         background
-        :current-page="1"
+        :current-page="page"
         :page-sizes="pSizes"
         :page-size="10"
         :pager-count="5"
         layout="total, sizes, prev, pager, next, jumper"
         :total="totalPage"
       ></el-pagination>
+
+      <!-- 新增学科的对话框 -->
+      <el-dialog title="新增学科" :visible.sync="dialogVisible" width="570px" center>
+        <!-- 对话框内表单 -->
+        <el-form
+          :model="ruleForm"
+          :rules="rules"
+          ref="ruleForm"
+          label-width="100px"
+          class="demo-ruleForm"
+        >
+          <el-form-item label="学科编号" prop="rid">
+            <el-input v-model="ruleForm.rid"></el-input>
+          </el-form-item>
+          <el-form-item label="学科名称" prop="name">
+            <el-input v-model="ruleForm.name"></el-input>
+          </el-form-item>
+          <el-form-item label="学科简称" prop="short_name">
+            <el-input v-model="ruleForm.short_name"></el-input>
+          </el-form-item>
+          <el-form-item label="学科简介" prop="intro">
+            <el-input v-model="ruleForm.intro"></el-input>
+          </el-form-item>
+          <el-form-item label="学科备注" prop="remark">
+            <el-input v-model="ruleForm.remark"></el-input>
+          </el-form-item>
+        </el-form>
+
+        <span slot="footer" class="dialog-footer" center>
+          <el-button @click="dialogVisible = false">取 消</el-button>
+          <el-button type="primary" @click="add">确 定</el-button>
+        </span>
+      </el-dialog>
     </div>
   </div>
 </template>
@@ -95,13 +132,13 @@ import { subject } from "../../../api/api";
 
 export default {
   name: "subject",
+  // ----------------------------------  data  -----------------------------
   data() {
     return {
       pSizes: [5, 10, 15, 20],
       totalPage: 100,
-      page: "",
+      page: 1,
       limit: "10",
-
       formInline: {
         // 不加也行，搜索时会自动创建
         // name: "",
@@ -111,7 +148,7 @@ export default {
       },
       tableData: [
         {
-          // 示例
+          // 示例数据
           rid: "qd001",
           name: "qdyidkf",
           short_name: "qianduan",
@@ -119,9 +156,25 @@ export default {
           create_time: "2016-05-02",
           status: "启用"
         }
-      ]
+      ],
+
+      // 对话框数据
+      dialogVisible: false,
+      ruleForm: {
+        rid: "",
+        name: "",
+        short_name: "",
+        intro: "",
+        remark: ""
+      },
+      rules: {
+        rid: [{ required: true, message: "学科编号不能为空", trigger: "blur" }],
+        name: [{ required: true, message: "学科名称不能为空", trigger: "blur" }]
+      }
     };
   },
+
+  // -----------------------------  methods  -----------------------------
   methods: {
     handleEdit(index, row) {
       window.console.log(index, row);
@@ -135,15 +188,16 @@ export default {
       // 控制每页多少条
       // 存到数据里发送请求时使用
       this.limit = val;
-      subject.list({page:this.page, limit: val }).then(res => {
-        this.tableData = res.data.data.items;
-      });
+
+      // page和当前页是同一数据
+      this.page = 1;
+      this.search();
     },
     handleCurrentChange(val) {
       // 当前页是第几页
       // 存到数据里发送请求时使用
       this.page = val;
-      subject.list({ page: val,limit: this.limit }).then(res => {
+      subject.list({ page: val, limit: this.limit }).then(res => {
         this.tableData = res.data.data.items;
       });
     },
@@ -154,23 +208,53 @@ export default {
         .list({ page: this.page, limit: this.limit, ...this.formInline })
         .then(res => {
           this.tableData = res.data.data.items;
+          // 总条数记得重新赋值
+          this.totalPage = res.data.data.pagination.total;
         });
     },
 
     // 启用 禁用当前数据
-    changeStatus(index,row){
-       subject.status({id:row.id, status: row.status==0?1:0 }).then(res => {
-          // this.tableData = res.data.data.items;
-          window.console.log(res);
+    changeStatus(index, row) {
+      subject
+        .status({ id: row.id, status: row.status == 0 ? 1 : 0 })
+        .then(res => {
+          if (res.data.code == 200) {
+            // 调用搜索方法刷新页面
+            this.search();
+          }
         });
-      // window.console.log(index);
-      // window.console.log(row);
-      // row.id
-      // row.status
-      
     },
 
+    // 新增学科
+    add() {
+      this.dialogVisible = false;
+      subject
+        .add({
+          ...this.ruleForm
+        })
+        .then(res => {
+          window.console.log(res);
+        });
+    },
+    // 对话框事件
+    submitForm(formName) {
+      this.$refs[formName].validate(valid => {
+        // 表单没问题的回调
+        if (valid) {
+          alert("submit!");
+        } else {
+          // 表单数据有问题
+          window.console.log("error submit!!");
+          return false;
+        }
+      });
+    },
+    resetForm(formName) {
+      this.$refs[formName].resetFields();
+    }
   },
+
+  // -------------------------------  create钩子  ------------------------------
   created() {
     subject.list({ page: this.page, limit: this.limit }).then(res => {
       window.console.log(res);
@@ -197,4 +281,13 @@ export default {
 .el-pagination {
   margin-top: 30px;
 }
+.el-dialog {
+  box-sizing: border-box;
+  .el-dialog__header {
+      background-color: rgb(6, 184, 250);
+      .el-dialog__title{
+        color: #fff;
+      }
+   }
+ }
 </style>
