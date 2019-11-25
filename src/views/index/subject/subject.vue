@@ -179,8 +179,27 @@ export default {
     handleEdit(index, row) {
       window.console.log(index, row);
     },
+    // 删除一行数据
     handleDelete(index, row) {
-      window.console.log(index, row);
+      window.console.log(index, row.id);
+
+      this.$confirm("此操作将永久删除该学科, 确定?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning"
+      }).then(() => {
+          // 接口调用
+          subject.remove({ id: row.id }).then(res => {
+            this.$message.success(res.data.message);
+            this.search();
+          });
+        })
+        .catch(() => {
+          this.$message({
+            type: "info",
+            message: "已取消删除"
+          });
+        });
     },
 
     // 分页
@@ -240,24 +259,18 @@ export default {
     submitForm(formName) {
       this.$refs[formName].validate(valid => {
         // 表单没问题的回调
-        if (valid) {
-          alert("submit!");
-        } else {
+        if (!valid) {
           // 表单数据有问题
-          window.console.log("error submit!!");
+          alert("检查一哈数据");
           return false;
         }
       });
-    },
-    resetForm(formName) {
-      this.$refs[formName].resetFields();
     }
   },
 
   // -------------------------------  create钩子  ------------------------------
   created() {
     subject.list({ page: this.page, limit: this.limit }).then(res => {
-      window.console.log(res);
       this.totalPage = res.data.data.pagination.total;
       this.tableData = res.data.data.items;
     });
@@ -284,10 +297,10 @@ export default {
 .el-dialog {
   box-sizing: border-box;
   .el-dialog__header {
-      background-color: rgb(6, 184, 250);
-      .el-dialog__title{
-        color: #fff;
-      }
-   }
- }
+    background-color: rgb(6, 184, 250);
+    .el-dialog__title {
+      color: #fff;
+    }
+  }
+}
 </style>

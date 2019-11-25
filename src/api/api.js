@@ -66,6 +66,7 @@ axios.interceptors.request.use(
 axios.interceptors.response.use(
   function (response) {
     // 判断token
+    // 有bug 新增学科不输入数据会有bug，之后看看
     if (response.data.code === 0) {
       // 提示
       Message.error(response.data);
@@ -73,8 +74,9 @@ axios.interceptors.response.use(
       removeToken();
       // 去登录页
       return;
-    }
-    return response;
+    } 
+      return response;
+    
   },
   function (error) {
     return Promise.reject(error);
@@ -110,43 +112,43 @@ axios.interceptors.response.use(
 // subject.add subject.remove
 export const subject = {
   // 新增
-  add(data){
+  add(data) {
     return axios({
-      url:"/subject/add",
-      method:"post",
+      url: "/subject/add",
+      method: "post",
       data
     })
   },
   // 列表
   // get请求的参数用params来传递
-  list(params){
+  list(params) {
     return axios({
-      url:"/subject/list",
-      method:"get",
+      url: "/subject/list",
+      method: "get",
       params
     })
   },
   // 状态
-  status(data){
+  status(data) {
     return axios({
-      url:"/subject/status",
-      method:"post",
+      url: "/subject/status",
+      method: "post",
       data
     })
   },
   // 编辑
-  edit(data){
+  edit(data) {
     return axios({
-      url:"/subject/edit",
-      method:"post",
+      url: "/subject/edit",
+      method: "post",
       data
     })
   },
   // 删除
-  remove(data){
+  remove(data) {
     return axios({
-      url:"/subject/remove",
-      method:"post",
+      url: "/subject/remove",
+      method: "post",
       data
     })
   },
