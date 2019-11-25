@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-import { getToken, removeToken } from '../utils/token'
+import { getToken } from '../utils/token'
 
 // 设置基地址
 axios.defaults.baseURL = 'http://183.237.67.218:3002';
@@ -71,7 +71,7 @@ axios.interceptors.response.use(
       // 提示
       Message.error(response.data);
       // 删除token
-      removeToken();
+      // removeToken();
       // 去登录页
       return;
     } 
