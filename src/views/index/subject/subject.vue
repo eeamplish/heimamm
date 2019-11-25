@@ -69,7 +69,7 @@
           <el-table-column label="操作">
             <template slot-scope="scope">
               <el-button type="text" size="small" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
-              <el-button type="text" size="small">禁用</el-button>
+              <el-button type="text" size="small" @click="changeStatus(scope.$index, scope.row)"> {{ scope.row.status==0 ?"启用":"禁用" }} </el-button>
               <el-button type="text" size="small" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
             </template>
           </el-table-column>
@@ -155,7 +155,21 @@ export default {
         .then(res => {
           this.tableData = res.data.data.items;
         });
-    }
+    },
+
+    // 启用 禁用当前数据
+    changeStatus(index,row){
+       subject.status({id:row.id, status: row.status==0?1:0 }).then(res => {
+          // this.tableData = res.data.data.items;
+          window.console.log(res);
+        });
+      // window.console.log(index);
+      // window.console.log(row);
+      // row.id
+      // row.status
+      
+    },
+
   },
   created() {
     subject.list({ page: this.page, limit: this.limit }).then(res => {
