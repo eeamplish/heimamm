@@ -76,10 +76,12 @@
         </el-table>
       </el-card>
       <el-pagination
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"
         background
         :current-page="1"
         :page-sizes="pSizes"
-        :page-size="20"
+        :page-size="10"
         :pager-count="5"
         layout="total, sizes, prev, pager, next, jumper"
         :total="totalPage"
@@ -97,10 +99,11 @@ export default {
     return {
       pSizes: [5, 10, 15, 20],
       totalPage: 100,
-      page:"",
-      limit:"",
+      page: "",
+      limit: "10",
 
       formInline: {
+        // 不加也行，搜索时会自动创建
         // name: "",
         // rid: "",
         // creater: "",
@@ -127,6 +130,24 @@ export default {
       window.console.log(index, row);
     },
 
+    // 分页
+    handleSizeChange(val) {
+      // 控制每页多少条
+      // 存到数据里发送请求时使用
+      this.limit = val;
+      subject.list({page:this.page, limit: val }).then(res => {
+        this.tableData = res.data.data.items;
+      });
+    },
+    handleCurrentChange(val) {
+      // 当前页是第几页
+      // 存到数据里发送请求时使用
+      this.page = val;
+      subject.list({ page: val,limit: this.limit }).then(res => {
+        this.tableData = res.data.data.items;
+      });
+    },
+
     // 搜索
     search() {
       subject
@@ -137,8 +158,9 @@ export default {
     }
   },
   created() {
-    subject.list(1, 10).then(res => {
+    subject.list({ page: this.page, limit: this.limit }).then(res => {
       window.console.log(res);
+      this.totalPage = res.data.data.pagination.total;
       this.tableData = res.data.data.items;
     });
   }
