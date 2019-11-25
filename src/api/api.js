@@ -82,3 +82,74 @@ axios.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+// subject 页面的方法暴露
+// export const subject = {
+//   // 新增
+//   add(data){
+//     return axios({
+//       url: "/subject/add",
+//       method:"post",
+//       data
+//     })
+//   },
+//   // 列表
+//   list(params){
+//     return axios({
+//       url: "/subject/list",
+//       method:"get",
+//       params
+//     })
+//   },
+//   // 状态
+//   state(date){
+//     return {
+//       axios 
+//     }
+//   }
+// }
+// 作用域 抽取学科接口
+// subject.add subject.remove
+export const subject ={
+  // 新增
+  add(data){
+    return axios({
+      url:"/subject/add",
+      method:"post",
+      data
+    })
+  },
+  // 列表
+  // get请求的参数用params来传递
+  list(params){
+    return axios({
+      url:"/subject/list",
+      method:"get",
+      params
+    })
+  },
+  // 状态
+  status(data){
+    return axios({
+      url:"/subject/status",
+      method:"post",
+      data
+    })
+  },
+  // 编辑
+  edit(data){
+    return axios({
+      url:"/subject/edit",
+      method:"post",
+      data
+    })
+  },
+  // 删除
+  remove(data){
+    return axios({
+      url:"/subject/remove",
+      method:"post",
+      data
+    })
+  },
+}
