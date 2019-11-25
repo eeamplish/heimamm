@@ -2,8 +2,6 @@ import axios from 'axios'
 
 import { getToken, removeToken } from '../utils/token'
 
-
-import router from '../router/router'
 // 设置基地址
 axios.defaults.baseURL = 'http://183.237.67.218:3002';
 // 设置跨域携带cookie
@@ -110,7 +108,7 @@ axios.interceptors.response.use(
 // }
 // 作用域 抽取学科接口
 // subject.add subject.remove
-export const subject ={
+export const subject = {
   // 新增
   add(data){
     return axios({

@@ -4,28 +4,28 @@
       <el-card class="box-card">
         <el-form :inline="true" :model="formInline" class="demo-form-inline">
           <el-form-item label="学科编号">
-            <el-input v-model="formInline.user" class="col1"></el-input>
+            <el-input v-model="formInline.rid" class="col1"></el-input>
           </el-form-item>
           <el-form-item label="学科名称">
-            <el-input v-model="formInline.user" class="col2"></el-input>
+            <el-input v-model="formInline.name" class="col2"></el-input>
           </el-form-item>
           <el-form-item label="创建者">
-            <el-input v-model="formInline.user" class="col1"></el-input>
+            <el-input v-model="formInline.creater" class="col1"></el-input>
           </el-form-item>
           <el-form-item label="状态">
-            <el-select v-model="formInline.region" placeholder="请选择状态" class="col2">
-              <el-option label="区域一" value="shanghai"></el-option>
-              <el-option label="区域二" value="beijing"></el-option>
+            <el-select v-model="formInline.status" placeholder="请选择状态" class="col2">
+              <el-option label="启用" value="1"></el-option>
+              <el-option label="禁用" value="0"></el-option>
             </el-select>
           </el-form-item>
           <el-form-item>
-            <el-button type="primary" @click="onSubmit">搜索</el-button>
+            <el-button type="primary" @click="search">搜索</el-button>
           </el-form-item>
           <el-form-item>
-            <el-button @click="onSubmit">清除</el-button>
+            <el-button>清除</el-button>
           </el-form-item>
           <el-form-item>
-            <el-button type="primary" icon="el-icon-plus" @click="onSubmit">新增学科</el-button>
+            <el-button type="primary" icon="el-icon-plus">新增学科</el-button>
           </el-form-item>
         </el-form>
       </el-card>
@@ -36,33 +36,34 @@
           <el-table-column type="index" label="序号"></el-table-column>
           <el-table-column label="学科编号" width="130">
             <template slot-scope="scope">
-              <span style="margin-left: 10px">{{ scope.row.num }}</span>
+              <span style="margin-left: 10px">{{ scope.row.rid }}</span>
             </template>
           </el-table-column>
           <el-table-column label="学科名称" width="130">
             <template slot-scope="scope">
-              <span style="margin-left: 10px">{{ scope.row.subName }}</span>
+              <span style="margin-left: 10px">{{ scope.row.name }}</span>
             </template>
           </el-table-column>
           <el-table-column label="简称" width="130">
             <template slot-scope="scope">
-              <span style="margin-left: 10px">{{ scope.row.abbr }}</span>
+              <span style="margin-left: 10px">{{ scope.row.short_name }}</span>
             </template>
           </el-table-column>
           <el-table-column label="创建者" width="130">
             <template slot-scope="scope">
-              <span style="margin-left: 10px">{{ scope.row.name }}</span>
+              <span style="margin-left: 10px">{{ scope.row.creater }}</span>
             </template>
           </el-table-column>
           <el-table-column label="创建日期" width="130">
             <template slot-scope="scope">
               <i class="el-icon-time"></i>
-              <span style="margin-left: 10px">{{ scope.row.date }}</span>
+              <span style="margin-left: 10px">{{ scope.row.create_time }}</span>
             </template>
           </el-table-column>
           <el-table-column label="状态" width="130">
             <template slot-scope="scope">
-              <span style="margin-left: 10px">{{ scope.row.state }}</span>
+              <span v-if="scope.row.status==0" style="margin-left: 10px">禁用</span>
+              <span v-else-if="scope.row.status==1" style="margin-left: 10px">启用</span>
             </template>
           </el-table-column>
           <el-table-column label="操作">
@@ -77,63 +78,69 @@
       <el-pagination
         background
         :current-page="1"
-        :page-sizes="[10, 20, 30, 40]"
+        :page-sizes="pSizes"
         :page-size="20"
         :pager-count="5"
         layout="total, sizes, prev, pager, next, jumper"
-        :total="100"
+        :total="totalPage"
       ></el-pagination>
     </div>
   </div>
 </template>
 
 <script>
+import { subject } from "../../../api/api";
+
 export default {
   name: "subject",
   data() {
     return {
+      pSizes: [5, 10, 15, 20],
+      totalPage: 100,
+      page:"",
+      limit:"",
+
       formInline: {
-        user: "",
-        region: ""
+        // name: "",
+        // rid: "",
+        // creater: "",
+        // status: ""
       },
       tableData: [
         {
-          num: "qd001",
-          subName: "qdyidkf",
-          abbr: "qianduan",
-          name: "王小虎",
-          date: "2016-05-02",
-          state: "启用"
-        },
-
-        {
-          num: "qd00",
-          subName: "qdyidkf",
-          abbr: "qianduan",
-          name: "王果他",
-          date: "2017-05-02",
-          state: "启用"
+          // 示例
+          rid: "qd001",
+          name: "qdyidkf",
+          short_name: "qianduan",
+          creater: "王小虎",
+          create_time: "2016-05-02",
+          status: "启用"
         }
       ]
     };
   },
   methods: {
-    onSubmit() {
-      alert("submit!");
-    },
     handleEdit(index, row) {
       window.console.log(index, row);
     },
     handleDelete(index, row) {
       window.console.log(index, row);
+    },
+
+    // 搜索
+    search() {
+      subject
+        .list({ page: this.page, limit: this.limit, ...this.formInline })
+        .then(res => {
+          this.tableData = res.data.data.items;
+        });
     }
-    // 分页
-    //  handleSizeChange(val) {
-    //     window.console.log(`每页 ${val} 条`);
-    //   },
-    //   handleCurrentChange(val) {
-    //     window.console.log(`当前页: ${val}`);
-    //   }
+  },
+  created() {
+    subject.list(1, 10).then(res => {
+      window.console.log(res);
+      this.tableData = res.data.data.items;
+    });
   }
 };
 </script>
